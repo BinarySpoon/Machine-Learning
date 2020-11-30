@@ -6,6 +6,7 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import precision_score
 from sklearn.datasets import make_classification
+from sklearn.model_selection import train_test_split
 
 # models -->
 from sklearn.neighbors import KNeighborsClassifier
