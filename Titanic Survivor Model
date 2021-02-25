@@ -1,40 +1,27 @@
-import numpy as np
+# A.Importing Libraries -->
 import pandas as pd
-from matplotlib import pyplot as plt
-import seaborn as sns
-from sklearn.metrics import accuracy_score
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
-from sklearn.preprocessing import MinMaxScaler
-from sklearn.model_selection import KFold
 from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
 
-
-# models -->
-from sklearn import linear_model
-from sklearn.svm import SVR
-from sklearn.model_selection import GridSearchCV
+# Models Used -->
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import GradientBoostingClassifier
-from sklearn.preprocessing import PolynomialFeatures
 from sklearn.svm import SVC
 
+# B.Setting Up Dataframe -->
 train_data = pd.read_csv('data/train.csv')
 test_data = pd.read_csv('data/test.csv')
 result = pd.read_csv('data/my_submission.csv')
 
-
 women = train_data.loc[train_data.Sex == 'female']["Survived"]
 rate_women = sum(women)/len(women)
-
 men = train_data.loc[train_data.Sex =='male']["Survived"]
 rate_men = sum(men)/len(men)
 
-print("perc. of women survived: ", rate_women)
-print("perc. of men survived: ",rate_men)
-
+# C.Setting Up Training Testing Data -->
 y_train = train_data["Survived"]
 y_test = result['Survived']
 
@@ -42,42 +29,66 @@ features = ["Pclass","Sex", "SibSp","Parch"]
 X_train = pd.get_dummies(train_data[features])
 X_test = pd.get_dummies(test_data[features])
 
-#Polynomial Linear Regression -->
-plr = make_pipeline(PolynomialFeatures(degree=3), linear_model.Ridge())
-plr.fit(X_train, y_train)
+# D.Training Models On Data -->
 
-# Random Forest Classifier -->
-rf = RandomForestClassifier(n_estimators=100, max_depth=5, random_state=1)
+# 1.Decision Tree Classifier -->
+dtc = make_pipeline(StandardScaler(), DecisionTreeClassifier(random_state=0))
+dtc.fit(X_train,y_train)
+
+# 2.Random Forest Classifier -->
+rf =  make_pipeline(RandomForestClassifier(n_estimators=100, max_depth=5, random_state=0))
 rf.fit(X_train, y_train)
 
-# Gradient boosting regressor -->
-gbc = make_pipeline(StandardScaler(), GradientBoostingClassifier(n_estimators=100, learning_rate=1.0, max_depth=1, random_state=0))
+# 3.Gradient boosting regressor -->
+gbc = make_pipeline(GradientBoostingClassifier(n_estimators=100, learning_rate=1.0, max_depth=1, random_state=0))
 gbc.fit(X_train, y_train)
 
-# Support Vector classification -->
-svc = make_pipeline(StandardScaler(), SVC(gamma="auto"))
+# 4.Support Vector classification -->
+svc = make_pipeline(SVC(gamma="auto"))
 svc.fit(X_train,y_train)
 
-#analysis
+# E.Analysing Results -->
 
-# Classification Report
-print(classification_report(y_test, gbc.predict(X_test)))
+# 1.Decision Tree Classifier -->
+print("-----------------------------------")
+print('Decision Tree Classifier')
+print('Accuracy Score: {:,.2f}'.format(dtc.score(X_test, y_test)))
 print()
-print('confusion_matrix: \n {}'.format(confusion_matrix(y_test, gbc.predict(X_test))))
+print(classification_report(y_test, dtc.predict(X_test)))
 print()
-print('gradient boosted classifier: {}'.format(gbc.score(X_test, y_test)))
+print('confusion_matrix: \n {}'.format(confusion_matrix(y_test, dtc.predict(X_test))))
 print()
+print("-----------------------------------")
 
+# 2.Random Forest Classifier -->
+print("-----------------------------------")
+print('Random Forest Classification')
+print('Accuracy Score: {:,.2f}'.format(rf.score(X_test,y_test)))
+print()
 print(classification_report(y_test, rf.predict(X_test)))
 print()
 print('confusion_matrix: \n {}'.format(confusion_matrix(y_test,rf.predict(X_test))))
 print()
-print('random forest score: {}'.format(rf.score(X_test,y_test)))
-print()
+print("-----------------------------------")
 
+# 3.Gradient Boosted regressor -->
+print("-----------------------------------")
+print('Gradient Booster')
+print('Accuracy Score: {:,.2f}'.format(gbc.score(X_test, y_test)))
+print()
+print(classification_report(y_test, gbc.predict(X_test)))
+print()
+print('confusion_matrix: \n {}'.format(confusion_matrix(y_test, gbc.predict(X_test))))
+print()
+print("-----------------------------------")
+
+# 4.Support Vector classification -->
+print("-----------------------------------")
+print('Support Vector Machine')
+print('Accuracy score: {:,.2f}'.format(svc.score(X_test,y_test)))
+print()
 print(classification_report(y_test, svc.predict(X_test)))
 print()
 print('confusion_matrix: \n {}'.format(confusion_matrix(y_test,svc.predict(X_test))))
 print()
-print('support vector score: {}'.format(svc.score(X_test,y_test)))
-print()
+print("-----------------------------------")
